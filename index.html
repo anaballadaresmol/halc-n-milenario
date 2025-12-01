@@ -1,1 +1,1202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Star Wars Battleship - Batalla Espacial</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Orbitron', sans-serif;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%);
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+  
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(2px 2px at 20% 30%, white, transparent),
+      radial-gradient(2px 2px at 60% 70%, white, transparent),
+      radial-gradient(1px 1px at 50% 50%, white, transparent),
+      radial-gradient(1px 1px at 80% 10%, white, transparent);
+    background-size: 200% 200%;
+    animation: estrellas 200s linear infinite;
+    opacity: 0.5;
+    z-index: 0;
+  }
+  
+  @keyframes estrellas {
+    from { background-position: 0 0; }
+    to { background-position: -200% -200%; }
+  }
+  
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  h1 {
+    text-align: center;
+    font-size: 3em;
+    margin: 20px 0;
+    text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff;
+    animation: brillo 2s ease-in-out infinite;
+  }
+  
+  @keyframes brillo {
+    0%, 100% { text-shadow: 0 0 20px #00ffff; }
+    50% { text-shadow: 0 0 40px #00ffff, 0 0 60px #00ffff; }
+  }
+  
+  /* Pantalla de selección */
+  #pantallaInicio {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  
+  .modo-juego {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 40px 0;
+    flex-wrap: wrap;
+  }
+  
+  .carta-modo {
+    background: rgba(0, 0, 0, 0.7);
+    border: 3px solid #00ffff;
+    border-radius: 15px;
+    padding: 30px;
+    width: 300px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  }
+  
+  .carta-modo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 40px rgba(0, 255, 255, 0.6);
+    border-color: #ffff00;
+  }
+  
+  .carta-modo h2 {
+    font-size: 2em;
+    margin-bottom: 15px;
+    color: #00ffff;
+  }
+  
+  .carta-modo p {
+    font-size: 1.1em;
+    line-height: 1.6;
+  }
+  
+  /* Selección de flotas */
+  #seleccionFlota {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  #seleccionFlota h2 {
+    font-size: 2em;
+    margin-bottom: 30px;
+    color: #ffff00;
+  }
+  
+  .flotas-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin: 30px 0;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .carta-flota {
+    background: rgba(0, 0, 0, 0.8);
+    border: 3px solid #555;
+    border-radius: 15px;
+    padding: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+  }
+  
+  .carta-flota:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+  }
+  
+  .carta-flota.republica { border-color: #4169e1; }
+  .carta-flota.republica:hover { box-shadow: 0 0 30px rgba(65, 105, 225, 0.6); }
+  
+  .carta-flota.imperio { border-color: #ff0000; }
+  .carta-flota.imperio:hover { box-shadow: 0 0 30px rgba(255, 0, 0, 0.6); }
+  
+  .carta-flota.rebelde { border-color: #ffa500; }
+  .carta-flota.rebelde:hover { box-shadow: 0 0 30px rgba(255, 165, 0, 0.6); }
+  
+  .carta-flota.separatista { border-color: #9370db; }
+  .carta-flota.separatista:hover { box-shadow: 0 0 30px rgba(147, 112, 219, 0.6); }
+  
+  .carta-flota h3 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+  }
+  
+  .carta-flota ul {
+    list-style: none;
+    text-align: left;
+    line-height: 2;
+  }
+  
+  .carta-flota li {
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Colocación de naves */
+  #colocacionNaves {
+    padding: 20px;
+  }
+  
+  .info-colocacion {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #00ffff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .info-colocacion h2 {
+    color: #ffff00;
+    margin-bottom: 10px;
+  }
+  
+  .controles-colocacion {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  
+  button {
+    background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+    border: none;
+    padding: 12px 25px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1em;
+    font-weight: bold;
+    color: #000;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    transition: all 0.2s;
+  }
+  
+  button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+  }
+  
+  button:active {
+    transform: scale(0.95);
+  }
+  
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .btn-rotar {
+    background: linear-gradient(135deg, #ffff00 0%, #ff8800 100%);
+  }
+  
+  .btn-aleatorio {
+    background: linear-gradient(135deg, #ff00ff 0%, #8800ff 100%);
+    color: white;
+  }
+  
+  .btn-continuar {
+    background: linear-gradient(135deg, #00ff00 0%, #008800 100%);
+  }
+  
+  /* Tableros de juego */
+  #juegoActivo {
+    padding: 20px;
+  }
+  
+  .info-juego {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #00ffff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .tableros-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    justify-items: center;
+  }
+  
+  .tablero-seccion {
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #00ffff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  }
+  
+  .tablero-seccion h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #ffff00;
+    font-size: 1.5em;
+  }
+  
+  .tablero {
+    display: grid;
+    grid-template-columns: repeat(11, 35px);
+    gap: 2px;
+    margin: 0 auto;
+    width: fit-content;
+  }
+  
+  .celda {
+    width: 35px;
+    height: 35px;
+    background: rgba(0, 50, 100, 0.5);
+    border: 1px solid #00ffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    cursor: default;
+    transition: all 0.2s;
+  }
+  
+  .celda.header {
+    background: rgba(0, 0, 0, 0.8);
+    color: #00ffff;
+    cursor: default;
+  }
+  
+  .celda.colocable {
+    cursor: pointer;
+  }
+  
+  .celda.colocable:hover {
+    background: rgba(0, 255, 0, 0.3);
+    transform: scale(1.1);
+  }
+  
+  .celda.nave {
+    background: rgba(0, 255, 0, 0.5);
+    border-color: #00ff00;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  }
+  
+  .celda.atacable {
+    cursor: crosshair;
+  }
+  
+  .celda.atacable:hover {
+    background: rgba(255, 255, 0, 0.4);
+    transform: scale(1.1);
+  }
+  
+  .celda.agua {
+    background: rgba(100, 150, 255, 0.3);
+    cursor: default;
+  }
+  
+  .celda.agua::after {
+    content: '○';
+    color: #6495ed;
+    font-size: 1.2em;
+  }
+  
+  .celda.impacto {
+    background: rgba(255, 0, 0, 0.7);
+    border-color: #ff0000;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+    animation: explosion 0.5s ease-out;
+  }
+  
+  .celda.impacto::after {
+    content: '✖';
+    color: #ffff00;
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+  
+  @keyframes explosion {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  .lista-naves {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+  }
+  
+  .lista-naves h4 {
+    color: #00ffff;
+    margin-bottom: 10px;
+  }
+  
+  .nave-item {
+    padding: 8px;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .nave-item.hundida {
+    background: rgba(255, 0, 0, 0.3);
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+  
+  .nave-item.seleccionada {
+    background: rgba(0, 255, 0, 0.3);
+    border: 2px solid #00ff00;
+  }
+  
+  /* Modal de victoria */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal.activo {
+    display: flex;
+  }
+  
+  .modal-contenido {
+    background: linear-gradient(135deg, #1a1a3a 0%, #0a0a1a 100%);
+    border: 3px solid #00ffff;
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    max-width: 500px;
+    box-shadow: 0 0 50px rgba(0, 255, 255, 0.8);
+    animation: aparecer 0.5s ease-out;
+  }
+  
+  @keyframes aparecer {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  
+  .modal-contenido h2 {
+    font-size: 2.5em;
+    color: #ffff00;
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px #ffff00;
+  }
+  
+  .modal-contenido p {
+    font-size: 1.3em;
+    margin: 15px 0;
+  }
+  
+  .pantalla {
+    display: none;
+  }
+  
+  .pantalla.activa {
+    display: block;
+  }
+  
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2em;
+    }
+    
+    .tableros-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .tablero {
+      grid-template-columns: repeat(11, 28px);
+    }
+    
+    .celda {
+      width: 28px;
+      height: 28px;
+      font-size: 0.7em;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>⭐ STAR WARS BATTLESHIP ⭐</h1>
+  
+  <!-- Pantalla de inicio -->
+  <div id="pantallaInicio" class="pantalla activa">
+    <h2 style="font-size: 2em; margin-bottom: 30px;">Selecciona el modo de juego</h2>
+    <div class="modo-juego">
+      <div class="carta-modo" onclick="seleccionarModo('amigo')">
+        <h2>👥</h2>
+        <h2>Dos Jugadores</h2>
+        <p>Juega contra un amigo en el mismo dispositivo. Turnos alternados para colocar flotas y atacar.</p>
+      </div>
+      <div class="carta-modo" onclick="seleccionarModo('maquina')">
+        <h2>🤖</h2>
+        <h2>Vs Máquina</h2>
+        <p>Enfrenta a la inteligencia artificial. La máquina colocará sus naves y atacará estratégicamente.</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Selección de flota -->
+  <div id="seleccionFlota" class="pantalla">
+    <h2 id="tituloSeleccion">Jugador 1 - Selecciona tu flota</h2>
+    <div class="flotas-container">
+      <div class="carta-flota republica" onclick="seleccionarFlota('republica')">
+        <h3>🔵 República Galáctica</h3>
+        <ul>
+          <li>⭐ Crucero Clase Venator (5)</li>
+          <li>🚀 Fragata Consular (4)</li>
+          <li>✈️ Caza Ala-V (3)</li>
+          <li>🛸 Transporte (3)</li>
+          <li>⚡ Interceptor (2)</li>
+        </ul>
+      </div>
+      
+      <div class="carta-flota imperio" onclick="seleccionarFlota('imperio')">
+        <h3>🔴 Imperio Galáctico</h3>
+        <ul>
+          <li>⭐ Destructor Estelar (5)</li>
+          <li>🚀 Crucero Clase Victoria (4)</li>
+          <li>✈️ Caza TIE Fighter (3)</li>
+          <li>🛸 Corbeta (3)</li>
+          <li>⚡ TIE Interceptor (2)</li>
+        </ul>
+      </div>
+      
+      <div class="carta-flota rebelde" onclick="seleccionarFlota('rebelde')">
+        <h3>🟠 Alianza Rebelde</h3>
+        <ul>
+          <li>⭐ Crucero Mon Calamari (5)</li>
+          <li>🚀 Fragata Nebulon-B (4)</li>
+          <li>✈️ Ala-X (3)</li>
+          <li>🛸 Corveta Corelliana (3)</li>
+          <li>⚡ Ala-A (2)</li>
+        </ul>
+      </div>
+      
+      <div class="carta-flota separatista" onclick="seleccionarFlota('separatista')">
+        <h3>🟣 Confederación Separatista</h3>
+        <ul>
+          <li>⭐ Crucero Providencia (5)</li>
+          <li>🚀 Fragata Munificente (4)</li>
+          <li>✈️ Caza Droide Buitre (3)</li>
+          <li>🛸 Nave de Desembarco (3)</li>
+          <li>⚡ Tri-Fighter (2)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Colocación de naves -->
+  <div id="colocacionNaves" class="pantalla">
+    <div class="info-colocacion">
+      <h2 id="tituloColocacion">Jugador 1 - Coloca tus naves</h2>
+      <p id="instruccionNave">Selecciona una nave y haz clic en el tablero para colocarla</p>
+      <div class="controles-colocacion">
+        <button class="btn-rotar" onclick="rotarNave()">↻ Rotar Nave</button>
+        <button class="btn-aleatorio" onclick="colocarAleatorio()">🎲 Colocación Aleatoria</button>
+        <button class="btn-continuar" onclick="continuarJuego()" id="btnContinuar" disabled>➤ Continuar</button>
+      </div>
+    </div>
+    
+    <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+      <div class="tablero-seccion">
+        <h3>Tu Tablero</h3>
+        <div id="tableroColocacion" class="tablero"></div>
+        <div class="lista-naves" id="listaNaves"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Juego activo -->
+  <div id="juegoActivo" class="pantalla">
+    <div class="info-juego">
+      <h2 id="turnoActual">Turno de Jugador 1</h2>
+      <p id="infoTurno">Selecciona una casilla en el tablero enemigo para atacar</p>
+    </div>
+    
+    <div class="tableros-container">
+      <div class="tablero-seccion">
+        <h3>Tu Flota</h3>
+        <div id="tableroPropio" class="tablero"></div>
+        <div class="lista-naves" id="navesPropiasJuego"></div>
+      </div>
+      
+      <div class="tablero-seccion">
+        <h3>Tablero Enemigo</h3>
+        <div id="tableroEnemigo" class="tablero"></div>
+        <div class="lista-naves" id="navesEnemigas"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal de victoria -->
+  <div id="modalVictoria" class="modal">
+    <div class="modal-contenido">
+      <h2 id="tituloVictoria">🎉 VICTORIA 🎉</h2>
+      <p id="mensajeVictoria"></p>
+      <button onclick="reiniciarJuego()" style="margin-top: 20px; font-size: 1.2em;">🔄 Jugar de Nuevo</button>
+    </div>
+  </div>
+</div>
 
+<script>
+// Configuración de flotas
+const flotas = {
+  republica: [
+    { nombre: 'Crucero Clase Venator', tamaño: 5, emoji: '⭐' },
+    { nombre: 'Fragata Consular', tamaño: 4, emoji: '🚀' },
+    { nombre: 'Caza Ala-V', tamaño: 3, emoji: '✈️' },
+    { nombre: 'Transporte', tamaño: 3, emoji: '🛸' },
+    { nombre: 'Interceptor', tamaño: 2, emoji: '⚡' }
+  ],
+  imperio: [
+    { nombre: 'Destructor Estelar', tamaño: 5, emoji: '⭐' },
+    { nombre: 'Crucero Clase Victoria', tamaño: 4, emoji: '🚀' },
+    { nombre: 'Caza TIE Fighter', tamaño: 3, emoji: '✈️' },
+    { nombre: 'Corbeta', tamaño: 3, emoji: '🛸' },
+    { nombre: 'TIE Interceptor', tamaño: 2, emoji: '⚡' }
+  ],
+  rebelde: [
+    { nombre: 'Crucero Mon Calamari', tamaño: 5, emoji: '⭐' },
+    { nombre: 'Fragata Nebulon-B', tamaño: 4, emoji: '🚀' },
+    { nombre: 'Ala-X', tamaño: 3, emoji: '✈️' },
+    { nombre: 'Corveta Corelliana', tamaño: 3, emoji: '🛸' },
+    { nombre: 'Ala-A', tamaño: 2, emoji: '⚡' }
+  ],
+  separatista: [
+    { nombre: 'Crucero Providencia', tamaño: 5, emoji: '⭐' },
+    { nombre: 'Fragata Munificente', tamaño: 4, emoji: '🚀' },
+    { nombre: 'Caza Droide Buitre', tamaño: 3, emoji: '✈️' },
+    { nombre: 'Nave de Desembarco', tamaño: 3, emoji: '🛸' },
+    { nombre: 'Tri-Fighter', tamaño: 2, emoji: '⚡' }
+  ]
+};
+
+// Estado del juego
+let modoJuego = null;
+let jugadorActual = 1;
+let faseColocacion = true;
+let orientacionHorizontal = true;
+let naveSeleccionada = 0;
+
+let jugador1 = {
+  flota: null,
+  tablero: crearTableroVacio(),
+  naves: [],
+  navesColocadas: []
+};
+
+let jugador2 = {
+  flota: null,
+  tablero: crearTableroVacio(),
+  naves: [],
+  navesColocadas: []
+};
+
+function crearTableroVacio() {
+  return Array(10).fill(null).map(() => Array(10).fill(0));
+}
+
+function seleccionarModo(modo) {
+  modoJuego = modo;
+  mostrarPantalla('seleccionFlota');
+  document.getElementById('tituloSeleccion').textContent = 
+    modoJuego === 'amigo' ? 'Jugador 1 - Selecciona tu flota' : 'Selecciona tu flota';
+}
+
+function seleccionarFlota(tipoFlota) {
+  if (jugadorActual === 1) {
+    jugador1.flota = tipoFlota;
+    jugador1.naves = JSON.parse(JSON.stringify(flotas[tipoFlota]));
+  } else {
+    jugador2.flota = tipoFlota;
+    jugador2.naves = JSON.parse(JSON.stringify(flotas[tipoFlota]));
+  }
+  
+  mostrarPantalla('colocacionNaves');
+  iniciarColocacion();
+}
+
+function iniciarColocacion() {
+  const jugador = jugadorActual === 1 ? jugador1 : jugador2;
+  document.getElementById('tituloColocacion').textContent = 
+    modoJuego === 'amigo' ? `Jugador ${jugadorActual} - Coloca tus naves` : 'Coloca tus naves';
+  
+  naveSeleccionada = 0;
+  orientacionHorizontal = true;
+  renderizarTableroColocacion();
+  renderizarListaNaves();
+  document.getElementById('btnContinuar').disabled = true;
+}
+
+function renderizarTableroColocacion() {
+  const tablero = document.getElementById('tableroColocacion');
+  tablero.innerHTML = '';
+  
+  const jugador = jugadorActual === 1 ? jugador1 : jugador2;
+  
+  // Headers
+  tablero.appendChild(crearCelda('', true));
+  for (let i = 0; i < 10; i++) {
+    tablero.appendChild(crearCelda(String.fromCharCode(65 + i), true));
+  }
+  
+  for (let fila = 0; fila < 10; fila++) {
+    tablero.appendChild(crearCelda(fila + 1, true));
+    for (let col = 0; col < 10; col++) {
+      const celda = crearCelda('');
+      celda.classList.add('colocable');
+      celda.dataset.fila = fila;
+      celda.dataset.col = col;
+      
+      if (jugador.tablero[fila][col] > 0) {
+        celda.classList.add('nave');
+        celda.classList.remove('colocable');
+        const naveIdx = jugador.tablero[fila][col] - 1;
+        celda.textContent = jugador.naves[naveIdx].emoji;
+      } else {
+        celda.addEventListener('click', () => colocarNave(fila, col));
+        celda.addEventListener('mouseenter', () => previsualizarNave(fila, col, true));
+        celda.addEventListener('mouseleave', () => previsualizarNave(fila, col, false));
+      }
+      
+      tablero.appendChild(celda);
+    }
+  }
+}
+
+function crearCelda(contenido, esHeader = false) {
+  const celda = document.createElement('div');
+  celda.className = esHeader ? 'celda header' : 'celda';
+  celda.textContent = contenido;
+  return celda;
+}
+
+function renderizarListaNaves() {
+  const lista = document.getElementById('listaNaves');
+  const jugador = jugadorActual === 1 ? jugador1 : jugador2;
+  
+  lista.innerHTML = '<h4>Tus Naves:</h4>';
+  jugador.naves.forEach((nave, idx) => {
+    const item = document.createElement('div');
+    item.className = 'nave-item';
+    if (idx === naveSeleccionada) item.classList.add('seleccionada');
+    if (jugador.navesColocadas.includes(idx)) item.classList.add('hundida');
+    
+    item.innerHTML = `
+      <span>${nave.emoji} ${nave.nombre}</span>
+      <span>${nave.tamaño} casillas</span>
+    `;
+    item.onclick = () => {
+      if (!jugador.navesColocadas.includes(idx)) {
+        naveSeleccionada = idx;
+        renderizarListaNaves();
+      }
+    };
+    lista.appendChild(item);
+  });
+}
+
+function previsualizarNave(fila, col, mostrar) {
+  const jugador = jugadorActual === 1 ? jugador1 : jugador2;
+  if (jugador.navesColocadas.includes(naveSeleccionada)) return;
+  
+  const nave = jugador.naves[naveSeleccionada];
+  const tamaño = nave.tamaño;
+  
+  for (let i = 0; i < tamaño; i++) {
+    const f = orientacionHorizontal ? fila : fila + i;
+    const c = orientacionHorizontal ? col + i : col;
+    
+    if (f >= 0 && f < 10 && c >= 0 && c < 10) {
+      const celda = document.querySelector(`[data-fila="${f}"][data-col="${c}"]`);
+      if (celda && jugador.tablero[f][c] === 0) {
+        if (mostrar) {
+          celda.style.background = 'rgba(0, 255, 0, 0.3)';
+        } else {
+          celda.style.background = '';
+        }
+      }
+    }
+  }
+}
+
+function colocarNave(fila, col) {
+  const jugador = jugadorActual === 1 ? jugador1 : jugador2;
+  if (jugador.navesColocadas.includes(naveSeleccionada)) return;
+  
+  const nave = jugador.naves[naveSeleccionada];
+  const tamaño = nave.tamaño;
+  
+  // Verificar si la nave cabe
+  if (!puedeColocarNave(fila, col, tamaño, orientacionHorizontal, jugador.tablero)) {
+    alert('No puedes colocar la nave aquí. Verifica que no se superponga con otras naves o salga del tablero.');
+    return;
+  }
+  
+  // Colocar la nave
+  for (let i = 0; i < tamaño; i++) {
+    const f = orientacionHorizontal ? fila : fila + i;
+    const c = orientacionHorizontal ? col + i : col;
+    jugador.tablero[f][c] = naveSeleccionada + 1;
+  }
+  
+  jugador.navesColocadas.push(naveSeleccionada);
+  
+  // Seleccionar siguiente nave
+  if (naveSeleccionada < jugador.naves.length - 1) {
+    naveSeleccionada++;
+  }
+  
+  renderizarTableroColocacion();
+  renderizarListaNaves();
+  
+  // Verificar si todas las naves están colocadas
+  if (jugador.navesColocadas.length === jugador.naves.length) {
+    document.getElementById('btnContinuar').disabled = false;
+  }
+}
+
+function puedeColocarNave(fila, col, tamaño, horizontal, tablero) {
+  for (let i = 0; i < tamaño; i++) {
+    const f = horizontal ? fila : fila + i;
+    const c = horizontal ? col + i : col;
+    
+    if (f < 0 || f >= 10 || c < 0 || c >= 10) return false;
+    if (tablero[f][c] !== 0) return false;
+  }
+  return true;
+}
+
+function rotarNave() {
+  orientacionHorizontal = !orientacionHorizontal;
+}
+
+function colocarAleatorio() {
+  const jugador = jugadorActual === 1 ? jugador1 : jugador2;
+  
+  // Limpiar tablero
+  jugador.tablero = crearTableroVacio();
+  jugador.navesColocadas = [];
+  
+  // Colocar todas las naves aleatoriamente
+  jugador.naves.forEach((nave, idx) => {
+    let colocada = false;
+    let intentos = 0;
+    
+    while (!colocada && intentos < 100) {
+      const fila = Math.floor(Math.random() * 10);
+      const col = Math.floor(Math.random() * 10);
+      const horizontal = Math.random() < 0.5;
+      
+      if (puedeColocarNave(fila, col, nave.tamaño, horizontal, jugador.tablero)) {
+        for (let i = 0; i < nave.tamaño; i++) {
+          const f = horizontal ? fila : fila + i;
+          const c = horizontal ? col + i : col;
+          jugador.tablero[f][c] = idx + 1;
+        }
+        jugador.navesColocadas.push(idx);
+        colocada = true;
+      }
+      intentos++;
+    }
+  });
+  
+  renderizarTableroColocacion();
+  renderizarListaNaves();
+  document.getElementById('btnContinuar').disabled = false;
+}
+
+function continuarJuego() {
+  if (modoJuego === 'amigo' && jugadorActual === 1) {
+    // Pasar al jugador 2
+    jugadorActual = 2;
+    alert('Jugador 1: Pasa el dispositivo al Jugador 2');
+    mostrarPantalla('seleccionFlota');
+    document.getElementById('tituloSeleccion').textContent = 'Jugador 2 - Selecciona tu flota';
+  } else if (modoJuego === 'maquina' && jugadorActual === 1) {
+    // La máquina coloca sus naves
+    jugadorActual = 2;
+    jugador2.flota = Object.keys(flotas)[Math.floor(Math.random() * 4)];
+    jugador2.naves = JSON.parse(JSON.stringify(flotas[jugador2.flota]));
+    colocarNavesIA();
+    iniciarPartida();
+  } else {
+    // Ambos jugadores tienen naves colocadas
+    iniciarPartida();
+  }
+}
+
+function colocarNavesIA() {
+  jugador2.tablero = crearTableroVacio();
+  jugador2.navesColocadas = [];
+  
+  jugador2.naves.forEach((nave, idx) => {
+    let colocada = false;
+    while (!colocada) {
+      const fila = Math.floor(Math.random() * 10);
+      const col = Math.floor(Math.random() * 10);
+      const horizontal = Math.random() < 0.5;
+      
+      if (puedeColocarNave(fila, col, nave.tamaño, horizontal, jugador2.tablero)) {
+        for (let i = 0; i < nave.tamaño; i++) {
+          const f = horizontal ? fila : fila + i;
+          const c = horizontal ? col + i : col;
+          jugador2.tablero[f][c] = idx + 1;
+        }
+        jugador2.navesColocadas.push(idx);
+        colocada = true;
+      }
+    }
+  });
+}
+
+function iniciarPartida() {
+  jugadorActual = 1;
+  faseColocacion = false;
+  
+  if (modoJuego === 'amigo') {
+    alert('¡Comienza la batalla! Jugador 1: Es tu turno');
+  }
+  
+  mostrarPantalla('juegoActivo');
+  renderizarJuego();
+}
+
+function renderizarJuego() {
+  const jugadorOfensivo = jugadorActual === 1 ? jugador1 : jugador2;
+  const jugadorDefensivo = jugadorActual === 1 ? jugador2 : jugador1;
+  
+  document.getElementById('turnoActual').textContent = 
+    modoJuego === 'amigo' ? `Turno de Jugador ${jugadorActual}` : (jugadorActual === 1 ? 'Tu Turno' : 'Turno de la Máquina');
+  
+  document.getElementById('infoTurno').textContent = 
+    jugadorActual === 1 || modoJuego === 'amigo' ? 'Selecciona una casilla en el tablero enemigo para atacar' : 'La máquina está atacando...';
+  
+  renderizarTableroPropio(jugadorOfensivo);
+  renderizarTableroEnemigo(jugadorDefensivo);
+  renderizarNavesEstado();
+  
+  if (modoJuego === 'maquina' && jugadorActual === 2) {
+    setTimeout(ataqueIA, 1500);
+  }
+}
+
+function renderizarTableroPropio(jugador) {
+  const tablero = document.getElementById('tableroPropio');
+  tablero.innerHTML = '';
+  
+  tablero.appendChild(crearCelda('', true));
+  for (let i = 0; i < 10; i++) {
+    tablero.appendChild(crearCelda(String.fromCharCode(65 + i), true));
+  }
+  
+  for (let fila = 0; fila < 10; fila++) {
+    tablero.appendChild(crearCelda(fila + 1, true));
+    for (let col = 0; col < 10; col++) {
+      const celda = crearCelda('');
+      const valor = jugador.tablero[fila][col];
+      
+      if (valor > 0) {
+        celda.classList.add('nave');
+        const naveIdx = Math.abs(valor) - 1;
+        celda.textContent = jugador.naves[naveIdx].emoji;
+        
+        if (valor < 0) {
+          celda.classList.add('impacto');
+        }
+      } else if (valor === -99) {
+        celda.classList.add('agua');
+      }
+      
+      tablero.appendChild(celda);
+    }
+  }
+}
+
+function renderizarTableroEnemigo(jugadorEnemigo) {
+  const tablero = document.getElementById('tableroEnemigo');
+  tablero.innerHTML = '';
+  
+  tablero.appendChild(crearCelda('', true));
+  for (let i = 0; i < 10; i++) {
+    tablero.appendChild(crearCelda(String.fromCharCode(65 + i), true));
+  }
+  
+  for (let fila = 0; fila < 10; fila++) {
+    tablero.appendChild(crearCelda(fila + 1, true));
+    for (let col = 0; col < 10; col++) {
+      const celda = crearCelda('');
+      const valor = jugadorEnemigo.tablero[fila][col];
+      
+      if (valor < 0 && valor !== -99) {
+        celda.classList.add('impacto');
+      } else if (valor === -99) {
+        celda.classList.add('agua');
+      } else {
+        celda.classList.add('atacable');
+        celda.dataset.fila = fila;
+        celda.dataset.col = col;
+        celda.addEventListener('click', () => atacar(fila, col));
+      }
+      
+      tablero.appendChild(celda);
+    }
+  }
+}
+
+function renderizarNavesEstado() {
+  const jugadorOfensivo = jugadorActual === 1 ? jugador1 : jugador2;
+  const jugadorDefensivo = jugadorActual === 1 ? jugador2 : jugador1;
+  
+  // Naves propias
+  const listaPropias = document.getElementById('navesPropiasJuego');
+  listaPropias.innerHTML = '<h4>Tus Naves:</h4>';
+  jugadorOfensivo.naves.forEach((nave, idx) => {
+    const item = document.createElement('div');
+    item.className = 'nave-item';
+    
+    const impactos = contarImpactosNave(jugadorOfensivo.tablero, idx + 1);
+    const hundida = impactos === nave.tamaño;
+    
+    if (hundida) item.classList.add('hundida');
+    
+    item.innerHTML = `
+      <span>${nave.emoji} ${nave.nombre}</span>
+      <span>${impactos}/${nave.tamaño}</span>
+    `;
+    listaPropias.appendChild(item);
+  });
+  
+  // Naves enemigas
+  const listaEnemigas = document.getElementById('navesEnemigas');
+  listaEnemigas.innerHTML = '<h4>Naves Enemigas:</h4>';
+  jugadorDefensivo.naves.forEach((nave, idx) => {
+    const item = document.createElement('div');
+    item.className = 'nave-item';
+    
+    const impactos = contarImpactosNave(jugadorDefensivo.tablero, idx + 1);
+    const hundida = impactos === nave.tamaño;
+    
+    if (hundida) item.classList.add('hundida');
+    
+    item.innerHTML = `
+      <span>${nave.emoji} ${nave.nombre}</span>
+      <span>${hundida ? 'HUNDIDA' : impactos > 0 ? `${impactos} impactos` : 'Intacta'}</span>
+    `;
+    listaEnemigas.appendChild(item);
+  });
+}
+
+function contarImpactosNave(tablero, naveId) {
+  let impactos = 0;
+  for (let fila = 0; fila < 10; fila++) {
+    for (let col = 0; col < 10; col++) {
+      if (tablero[fila][col] === -naveId) {
+        impactos++;
+      }
+    }
+  }
+  return impactos;
+}
+
+function atacar(fila, col) {
+  const jugadorDefensivo = jugadorActual === 1 ? jugador2 : jugador1;
+  const valor = jugadorDefensivo.tablero[fila][col];
+  
+  if (valor === 0) {
+    // Agua
+    jugadorDefensivo.tablero[fila][col] = -99;
+    alert('¡Agua! Fallaste el disparo.');
+    cambiarTurno();
+  } else if (valor > 0) {
+    // Impacto
+    jugadorDefensivo.tablero[fila][col] = -valor;
+    const nave = jugadorDefensivo.naves[valor - 1];
+    
+    if (naveHundida(jugadorDefensivo.tablero, valor)) {
+      alert(`¡HUNDIDO! Has destruido: ${nave.nombre}`);
+      
+      if (todasNavesHundidas(jugadorDefensivo.tablero)) {
+        mostrarVictoria();
+        return;
+      }
+    } else {
+      alert(`¡IMPACTO! Has golpeado: ${nave.nombre}`);
+    }
+    
+    // En modo máquina, el jugador sigue atacando
+    if (modoJuego === 'maquina' && jugadorActual === 1) {
+      renderizarJuego();
+    } else {
+      cambiarTurno();
+    }
+  }
+}
+
+function naveHundida(tablero, naveId) {
+  for (let fila = 0; fila < 10; fila++) {
+    for (let col = 0; col < 10; col++) {
+      if (tablero[fila][col] === naveId) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function todasNavesHundidas(tablero) {
+  for (let fila = 0; fila < 10; fila++) {
+    for (let col = 0; col < 10; col++) {
+      if (tablero[fila][col] > 0) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function ataqueIA() {
+  let fila, col;
+  let intentos = 0;
+  
+  do {
+    fila = Math.floor(Math.random() * 10);
+    col = Math.floor(Math.random() * 10);
+    intentos++;
+  } while ((jugador1.tablero[fila][col] < 0 || jugador1.tablero[fila][col] === -99) && intentos < 100);
+  
+  const valor = jugador1.tablero[fila][col];
+  
+  if (valor === 0) {
+    jugador1.tablero[fila][col] = -99;
+    alert(`La máquina ataca en ${String.fromCharCode(65 + col)}${fila + 1}: ¡Agua!`);
+    cambiarTurno();
+  } else if (valor > 0) {
+    jugador1.tablero[fila][col] = -valor;
+    const nave = jugador1.naves[valor - 1];
+    
+    if (naveHundida(jugador1.tablero, valor)) {
+      alert(`La máquina ataca en ${String.fromCharCode(65 + col)}${fila + 1}: ¡HUNDIDO! ${nave.nombre} destruida`);
+      
+      if (todasNavesHundidas(jugador1.tablero)) {
+        mostrarVictoria();
+        return;
+      }
+    } else {
+      alert(`La máquina ataca en ${String.fromCharCode(65 + col)}${fila + 1}: ¡IMPACTO! ${nave.nombre} golpeada`);
+    }
+    
+    setTimeout(ataqueIA, 1500);
+  }
+}
+
+function cambiarTurno() {
+  if (modoJuego === 'amigo') {
+    jugadorActual = jugadorActual === 1 ? 2 : 1;
+    alert(`Turno del Jugador ${jugadorActual}. Pasa el dispositivo.`);
+  } else {
+    jugadorActual = jugadorActual === 1 ? 2 : 1;
+  }
+  renderizarJuego();
+}
+
+function mostrarVictoria() {
+  const ganador = jugadorActual === 1 ? 1 : 2;
+  document.getElementById('tituloVictoria').textContent = '🎉 VICTORIA 🎉';
+  
+  if (modoJuego === 'amigo') {
+    document.getElementById('mensajeVictoria').textContent = 
+      `¡Jugador ${ganador} ha ganado la batalla! Todas las naves enemigas han sido destruidas.`;
+  } else {
+    document.getElementById('mensajeVictoria').textContent = 
+      ganador === 1 ? 
+      '¡Has ganado la batalla! Todas las naves enemigas han sido destruidas.' :
+      'La máquina ha ganado. Todas tus naves han sido destruidas.';
+  }
+  
+  document.getElementById('modalVictoria').classList.add('activo');
+}
+
+function reiniciarJuego() {
+  modoJuego = null;
+  jugadorActual = 1;
+  faseColocacion = true;
+  
+  jugador1 = {
+    flota: null,
+    tablero: crearTableroVacio(),
+    naves: [],
+    navesColocadas: []
+  };
+  
+  jugador2 = {
+    flota: null,
+    tablero: crearTableroVacio(),
+    naves: [],
+    navesColocadas: []
+  };
+  
+  document.getElementById('modalVictoria').classList.remove('activo');
+  mostrarPantalla('pantallaInicio');
+}
+
+function mostrarPantalla(id) {
+  document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+  document.getElementById(id).classList.add('activa');
+}
+</script>
+</body>
+</html>
